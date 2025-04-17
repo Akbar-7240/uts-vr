@@ -1,0 +1,11 @@
+Model Information:
+* title:	Busscar Ecoss MB OF-1721 - FULL
+* source:	https://sketchfab.com/3d-models/busscar-ecoss-mb-of-1721-full-db6df9e45e17418c9f191f81af27bbcf
+* author:	QCY (https://sketchfab.com/PaTHE)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Busscar Ecoss MB OF-1721 - FULL" (https://sketchfab.com/3d-models/busscar-ecoss-mb-of-1721-full-db6df9e45e17418c9f191f81af27bbcf) by QCY (https://sketchfab.com/PaTHE) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

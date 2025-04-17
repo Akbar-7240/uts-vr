@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>VR Sederhana dengan A-Frame</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+
+  <script>
+    // Komponen pergerakan otomatis mobil
+    AFRAME.registerComponent('auto-car-movement', {
+      init: function () {
+        this.speed = 5;
+        this.direction = 1;
+        this.moveDistance = 0;
+        this.maxDistance = 40;
+      },
+      tick: function (time, deltaTime) {
+        const position = this.el.object3D.position;
+        const delta = this.speed * this.direction * (deltaTime / 1000);
+        const angle = this.el.object3D.rotation.y;
+
+        position.x -= Math.sin(angle) * delta;
+        position.z -= Math.cos(angle) * delta;
+        this.moveDistance += Math.abs(delta);
+
+        if (this.moveDistance >= this.maxDistance) {
+          this.direction *= -1;
+          this.moveDistance = 0;
+          this.el.object3D.rotateY(Math.PI);
+        }
+      }
+    });
+
+    // Komponen zoom kamera
+    AFRAME.registerComponent('camera-zoom', {
+      schema: {
+        minFov: { type: 'number', default: 20 },
+        maxFov: { type: 'number', default: 80 },
+        zoomSpeed: { type: 'number', default: 2 }
+      },
+      init: function () {
+        this.camera = this.el.getObject3D('camera');
+        if (!this.camera) {
+          this.el.addEventListener('loaded', () => {
+            this.camera = this.el.getObject3D('camera');
+          });
+        }
+        window.addEventListener('wheel', this.onWheel.bind(this));
+      },
+      onWheel: function (event) {
+        if (!this.camera) return;
+        let fov = this.camera.fov;
+        fov += event.deltaY * 0.01 * this.data.zoomSpeed;
+        fov = Math.max(this.data.minFov, Math.min(this.data.maxFov, fov));
+        this.camera.fov = fov;
+        this.camera.updateProjectionMatrix();
+      }
+    });
+
+    // Komponen kontrol mouse untuk menggerakkan bus
+    AFRAME.registerComponent('mouse-drag-move', {
+      schema: {
+        speed: { type: 'number', default: 0.1 }
+      },
+      init: function () {
+        this.dragging = false;
+        this.lastClientX = 0;
+
+        window.addEventListener('mousedown', (e) => {
+          this.dragging = true;
+          this.lastClientX = e.clientX;
+        });
+
+        window.addEventListener('mouseup', () => {
+          this.dragging = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!this.dragging) return;
+          const dx = e.clientX - this.lastClientX;
+          this.lastClientX = e.clientX;
+
+          const position = this.el.object3D.position;
+          position.z += dx * this.data.speed;
+        });
+      }
+    });
+
+    // Komponen pergerakan otomatis orang berlari secara dinamis
+    AFRAME.registerComponent('auto-person-run', {
+      init: function () {
+        this.speed = 5;
+        this.path = [
+          { x: 0, z: -10 },
+          { x: 20, z: -10 },
+          { x: 20, z: 10 },
+          { x: 0, z: 10 }
+        ];
+        this.index = 0;
+        this.epsilon = 0.3;
+        this.target = this.path[this.index];
+        this.position = this.el.object3D.position;
+      },
+      tick: function (time, deltaTime) {
+        if (!this.target) return;
+
+        const delta = (deltaTime / 1000) * this.speed;
+        const dx = this.target.x - this.position.x;
+        const dz = this.target.z - this.position.z;
+        const distance = Math.sqrt(dx * dx + dz * dz);
+
+        if (distance < this.epsilon) {
+          this.index = (this.index + 1) % this.path.length;
+          this.target = this.path[this.index];
+          return;
+        }
+
+        // Gerak dan rotasi ke arah target
+        const angle = Math.atan2(dz, dx);
+        this.el.object3D.rotation.y = -angle + Math.PI / 2;
+        this.position.x += (dx / distance) * delta;
+        this.position.z += (dz / distance) * delta;
+      }
+    });
+
+    // Komponen pergerakan pesawat berputar
+    AFRAME.registerComponent('circle-flight', {
+      schema: {
+        radius: { type: 'number', default: 10 },
+        speed: { type: 'number', default: 0.5 },
+        height: { type: 'number', default: 10 }
+      },
+      init: function () {
+        this.angle = 0;
+      },
+      tick: function (time, deltaTime) {
+        const delta = deltaTime / 1000;
+        this.angle += this.data.speed * delta;
+
+        const x = this.data.radius * Math.cos(this.angle);
+        const z = this.data.radius * Math.sin(this.angle);
+        const y = this.data.height;
+
+        this.el.setAttribute('position', { x, y, z });
+
+        // Rotasi agar pesawat menghadap arah gerak
+        this.el.object3D.rotation.y = -this.angle + Math.PI / 2;
+      }
+    });
+  </script>
+</head>
+<body>
+<a-scene vr-mode-ui="enabled: true">
+
+  <!-- Suara latar -->
+  <a-entity sound="src: url(assets/sound/backsound.mp3); autoplay: true; loop: true; volume: 25"></a-entity>
+
+  <!-- Cahaya -->
+  <a-entity light="type: ambient; color: #FFFFFF"></a-entity>
+  <a-entity light="type: directional; intensity: 0.8" position="1 1 0"></a-entity>
+
+  <!-- Kamera -->
+  <a-camera 
+    position="60 50 125" 
+    look-controls="pointerLockEnabled: true" 
+    wasd-controls 
+    camera-zoom>
+    <a-cursor
+      cursor="fuse: true; fuseTimeout: 500" 
+      position="0 0 -1" 
+      geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
+      material="color: black; shader: flat">
+    </a-cursor>
+  </a-camera>
+
+  <!-- Lingkungan -->
+  <a-entity 
+    gltf-model="assets/scene.gltf" 
+    position="0 0 0" 
+    scale="1 1 1">
+  </a-entity>
+
+  <!-- Mobil bergerak otomatis -->
+  <a-entity 
+    id="car" 
+    gltf-model="assets/mobil/scene.gltf" 
+    position="-37.514 -2.987 -4.247" 
+    scale="0.940 1.003 0.693" 
+    auto-car-movement>
+  </a-entity>
+
+  <!-- Bus digerakkan dengan mouse -->
+  <a-entity 
+    id="buss" 
+    gltf-model="assets/buss/scene.gltf" 
+    position="38.621 -3.123 -40.639" 
+    scale="1 1 1" 
+    mouse-drag-move>
+  </a-entity>
+
+  <!-- Orang berlari otomatis -->
+  <a-entity 
+    id="person" 
+    gltf-model="assets/orang/scene.gltf" 
+    position="0.201 -2.814 7.579" 
+    scale="1 1 1" 
+    animation-mixer="clip: mixamo.com; loop: repeat"
+    auto-person-run>
+  </a-entity>
+
+  <!-- Air mancur -->
+  <a-entity 
+    id="air-mancur" 
+    gltf-model="assets/air mancur/scene.gltf" 
+    position="1.285 -2.699 19.035" 
+    scale="0.008 0.010 0.008"
+    animation-mixer="clip: Object_0; loop: repeat">
+  </a-entity>
+
+  <!-- Kursi 1 -->
+  <a-entity 
+    id="kursi" 
+    gltf-model="assets/kursi/scene.gltf" 
+    position="32.663 -3.262 17.876" 
+    rotation="180.010 90.000 179.999" 
+    scale="0.040 0.030 0.030">
+  </a-entity>
+
+  <!-- Kursi 2 -->
+  <a-entity 
+    id="kursi" 
+    gltf-model="assets/kursi 2/scene.gltf" 
+    position="32.663 -3.262 33.877" 
+    rotation="180.010 90.000 179.999" 
+    scale="0.040 0.030 0.030">
+  </a-entity>
+
+  <!-- Santai -->
+  <a-entity 
+    id="santai" 
+    gltf-model="assets/santai/scene.gltf" 
+    position="22.831 -3.221 25.000" 
+    scale="2.000 2.500 1.700"
+    animation-mixer="clip: *; loop: repeat">
+  </a-entity>
+
+  <!-- Skater -->
+  <a-entity 
+    id="scatter" 
+    gltf-model="assets/skater/scene.gltf" 
+    position="16.947 -3.000 32.038" 
+    scale="1.500 1.500 1.500"
+    animation-mixer="clip: Take 01; loop: repeat">
+  </a-entity>
+
+  <!-- Pesawat berputar -->
+  <a-entity 
+    id="pesawat" 
+    gltf-model="assets/plane/scene.gltf" 
+    position="-2.624 15.431 -24.565"
+    rotation="0 -7997.024 0"
+    scale="0.900 0.900 0.900" 
+    animation-mixer="clip: FlyingLoop; loop: repeat"
+    circle-flight="radius: 50; speed: 0.8; height: 25">
+  </a-entity>
+
+  <!-- Gerbang Depan -->
+<a-entity 
+id="gerbang-depan" 
+gltf-model="assets/gerbang depan/scene.gltf" 
+position="-6.068 -2.074 34.896" 
+rotation="-180.000 89.257 -180.000"
+scale="1 1 3.510">
+</a-entity>
+
+ <!-- Gerbang Belakang -->
+ <a-entity 
+ id="gerbang-belakang" 
+ gltf-model="assets/gerbang belakang/scene.gltf" 
+ position="-6.068 -1.794 -73.677" 
+ rotation="-180.000 89.257 -180.000"
+ scale="1 1 3.510">
+ </a-entity>
+
+ <a-entity 
+ id="dagangan" 
+ gltf-model="assets/dagangan/scene.gltf" 
+ position="23.773 -3.000 48.705" 
+ scale="1.500 1.500 1.500">
+</a-entity>
+
+<a-entity 
+ id="man" 
+ gltf-model="assets/man/scene.gltf" 
+ position="29.084 -3.034 47.393" 
+ rotation="0 7.376 0"
+ scale="1 1 1"
+ animation-mixer="clip: *; loop: repeat">
+</a-entity>
+
+
+  <!-- Latar belakang langit -->
+  <a-sky color="#ECECEC"></a-sky>
+</a-scene>
+</body>
+</html>

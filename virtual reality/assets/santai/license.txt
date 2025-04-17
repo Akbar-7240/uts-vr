@@ -1,0 +1,11 @@
+Model Information:
+* title:	Picknick Table/Park bench
+* source:	https://sketchfab.com/3d-models/picknick-tablepark-bench-781c5c002e114305beafd3f2f9bb1b50
+* author:	Maggadog (https://sketchfab.com/mwangiwambui.wambui)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Picknick Table/Park bench" (https://sketchfab.com/3d-models/picknick-tablepark-bench-781c5c002e114305beafd3f2f9bb1b50) by Maggadog (https://sketchfab.com/mwangiwambui.wambui) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

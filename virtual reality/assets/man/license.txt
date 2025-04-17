@@ -1,0 +1,11 @@
+Model Information:
+* title:	Mr Man Talking hard
+* source:	https://sketchfab.com/3d-models/mr-man-talking-hard-258eb90565e642b4b888118c307ca612
+* author:	Instinto Ideal Studio (https://sketchfab.com/instideal2019)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Mr Man Talking hard" (https://sketchfab.com/3d-models/mr-man-talking-hard-258eb90565e642b4b888118c307ca612) by Instinto Ideal Studio (https://sketchfab.com/instideal2019) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
